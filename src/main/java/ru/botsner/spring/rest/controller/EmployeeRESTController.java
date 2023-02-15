@@ -1,9 +1,10 @@
 package ru.botsner.spring.rest.controller;
 
-import ru.botsner.spring.rest.entity.Employee;
-import ru.botsner.spring.rest.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.botsner.spring.rest.entity.Employee;
+import ru.botsner.spring.rest.exception_handling.EmployeeNotFoundException;
+import ru.botsner.spring.rest.service.EmployeeService;
 
 import java.util.List;
 
@@ -25,7 +26,13 @@ public class EmployeeRESTController {
 
     @GetMapping("/{empId}")
     public Employee getEmployee(@PathVariable int empId) {
-        return employeeService.getEmployee(empId);
+        Employee employee = employeeService.getEmployee(empId);
+
+        if (employee == null) {
+            throw new EmployeeNotFoundException("There is no employee with ID = " + empId + " in Database");
+        }
+
+        return employee;
     }
 
     @PostMapping
@@ -41,7 +48,13 @@ public class EmployeeRESTController {
     }
 
     @DeleteMapping("/{empId}")
-    public void deleteEmployee(@PathVariable int empId) {
+    public String deleteEmployee(@PathVariable int empId) {
+        Employee employee = employeeService.getEmployee(empId);
+        if (employee == null) {
+            throw new EmployeeNotFoundException("There is no employee with ID = " + empId + " in Database");
+        }
+
         employeeService.deleteEmployee(empId);
+        return "Employee with ID = " + empId + " was deleted";
     }
 }

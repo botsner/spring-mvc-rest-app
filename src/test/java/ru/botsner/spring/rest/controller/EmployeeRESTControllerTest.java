@@ -11,11 +11,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ru.botsner.spring.rest.entity.Employee;
+import ru.botsner.spring.rest.exception_handling.EmployeeExceptionHandler;
+import ru.botsner.spring.rest.exception_handling.EmployeeNotFoundException;
 import ru.botsner.spring.rest.service.EmployeeService;
 
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -34,6 +37,7 @@ class EmployeeRESTControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new EmployeeRESTController(employeeService))
+                .setControllerAdvice(EmployeeExceptionHandler.class)
                 .build();
 
         objectMapper = new ObjectMapper();
@@ -81,6 +85,16 @@ class EmployeeRESTControllerTest {
     }
 
     @Test
+    void getEmployee_getNotExistingEmployee_status404andExceptionThrown() throws Exception {
+        Mockito.doReturn(null).when(employeeService).getEmployee(Mockito.anyInt());
+
+        mockMvc.perform(
+                get("/api/employees/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof EmployeeNotFoundException));
+    }
+
+    @Test
     void addNewEmployee() throws Exception {
         mockMvc.perform(
                 post("/api/employees")
@@ -114,10 +128,24 @@ class EmployeeRESTControllerTest {
 
     @Test
     void deleteEmployee() throws Exception {
+        Mockito.doReturn(employee).when(employeeService).getEmployee(Mockito.anyInt());
+
         mockMvc.perform(
                 delete("/api/employees/1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().string("Employee with ID = 1 was deleted"));
 
-        Mockito.verify(employeeService, Mockito.only()).deleteEmployee(Mockito.anyInt());
+        Mockito.verify(employeeService, Mockito.times(1)).getEmployee(Mockito.anyInt());
+        Mockito.verify(employeeService, Mockito.times(1)).deleteEmployee(Mockito.anyInt());
+    }
+
+    @Test
+    void deleteEmployee_deleteNotExistingEmployee_status404andExceptionThrown() throws Exception {
+        Mockito.doReturn(null).when(employeeService).getEmployee(Mockito.anyInt());
+
+        mockMvc.perform(
+                delete("/api/employees/1"))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof EmployeeNotFoundException));
     }
 }
