@@ -32,7 +32,7 @@ public class EmployeeRESTController {
         Employee employee = employeeService.getEmployee(empId);
 
         if (employee == null) {
-            throw new EmployeeNotFoundException("There is no employee with ID = " + empId + " in Database");
+            throw new EmployeeNotFoundException(empId);
         }
         return ResponseEntity.ok().body(employee);
     }
@@ -46,6 +46,10 @@ public class EmployeeRESTController {
     @PutMapping("/{empId}")
     public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee, @PathVariable int empId) {
         Employee updatedEmployee = employeeService.updateEmployee(employee, empId);
+
+        if (updatedEmployee == null) {
+            throw new EmployeeNotFoundException(empId);
+        }
         return ResponseEntity.ok().body(updatedEmployee);
     }
 
@@ -54,7 +58,7 @@ public class EmployeeRESTController {
         Employee deletedEmp = employeeService.deleteEmployee(empId);
 
         if (deletedEmp == null) {
-            throw new EmployeeNotFoundException("There is no employee with ID = " + empId + " in Database");
+            throw new EmployeeNotFoundException(empId);
         }
         return ResponseEntity.ok().body(deletedEmp);
     }

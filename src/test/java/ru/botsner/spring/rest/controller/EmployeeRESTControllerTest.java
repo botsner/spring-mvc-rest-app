@@ -126,6 +126,18 @@ class EmployeeRESTControllerTest {
     }
 
     @Test
+    void updateEmployee_updateNotExistingEmployee_status404andExceptionThrown() throws Exception {
+        Mockito.doReturn(null).when(employeeService).updateEmployee(Mockito.any(Employee.class), Mockito.anyInt());
+
+        mockMvc.perform(
+                put("/api/employees/1")
+                        .content(objectMapper.writeValueAsString(new Employee()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(mvcResult -> assertTrue(mvcResult.getResolvedException() instanceof EmployeeNotFoundException));
+    }
+
+    @Test
     void deleteEmployee() throws Exception {
         Mockito.doReturn(employee).when(employeeService).deleteEmployee(Mockito.anyInt());
 

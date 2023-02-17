@@ -9,10 +9,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class EmployeeExceptionHandler {
 
     @ExceptionHandler
-    public ResponseEntity<EmployeeIncorrectData> handleException(EmployeeNotFoundException exception) {
-        EmployeeIncorrectData incorrectData = new EmployeeIncorrectData();
-        incorrectData.setInfo(exception.getMessage());
+    public ResponseEntity<ErrorResponse> handleException(EmployeeNotFoundException exception) {
+        HttpStatus status = HttpStatus.NOT_FOUND;
 
-        return new ResponseEntity<>(incorrectData, HttpStatus.NOT_FOUND);
+        ErrorResponse response = new ErrorResponse();
+        response.setStatus(status.value());
+        response.setError(status.getReasonPhrase());
+        response.setInfo(exception.getMessage());
+
+        return new ResponseEntity<>(response, status);
     }
 }
