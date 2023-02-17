@@ -100,7 +100,7 @@ class EmployeeRESTControllerTest {
                 post("/api/employees")
                         .content(objectMapper.writeValueAsString(employee))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(employee)));
 
         Mockito.verify(employeeService, Mockito.only()).saveEmployee(Mockito.any(Employee.class));
@@ -109,14 +109,13 @@ class EmployeeRESTControllerTest {
 
     @Test
     void updateEmployee() throws Exception {
-        Mockito.doAnswer(invocation -> {
-            invocation.getArgument(0, Employee.class).setId(1);
-            return null;
-        }).when(employeeService).updateEmployee(Mockito.any(Employee.class), Mockito.anyInt());
+        employee.setId(1);
+
+        Mockito.doReturn(employee).when(employeeService).updateEmployee(Mockito.any(Employee.class), Mockito.anyInt());
 
         mockMvc.perform(
                 put("/api/employees/1")
-                        .content(objectMapper.writeValueAsString(employee))
+                        .content(objectMapper.writeValueAsString(new Employee()))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -128,20 +127,19 @@ class EmployeeRESTControllerTest {
 
     @Test
     void deleteEmployee() throws Exception {
-        Mockito.doReturn(employee).when(employeeService).getEmployee(Mockito.anyInt());
+        Mockito.doReturn(employee).when(employeeService).deleteEmployee(Mockito.anyInt());
 
         mockMvc.perform(
                 delete("/api/employees/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Employee with ID = 1 was deleted"));
+                .andExpect(content().json(objectMapper.writeValueAsString(employee)));
 
-        Mockito.verify(employeeService, Mockito.times(1)).getEmployee(Mockito.anyInt());
-        Mockito.verify(employeeService, Mockito.times(1)).deleteEmployee(Mockito.anyInt());
+        Mockito.verify(employeeService, Mockito.only()).deleteEmployee(Mockito.anyInt());
     }
 
     @Test
     void deleteEmployee_deleteNotExistingEmployee_status404andExceptionThrown() throws Exception {
-        Mockito.doReturn(null).when(employeeService).getEmployee(Mockito.anyInt());
+        Mockito.doReturn(null).when(employeeService).deleteEmployee(Mockito.anyInt());
 
         mockMvc.perform(
                 delete("/api/employees/1"))
