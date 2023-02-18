@@ -51,7 +51,7 @@ class EmployeeRESTControllerTest {
     }
 
     @Test
-    void listAllEmployees() throws Exception {
+    void listAllEmployees_getEmployees_status200() throws Exception {
         Employee emp1 = new Employee("Givi", "Zurabovich", "HR", 1000);
         Employee emp2 = new Employee("Merin", "Gek", "IT", 1200);
 
@@ -67,7 +67,7 @@ class EmployeeRESTControllerTest {
     }
 
     @Test
-    void getEmployee() throws Exception {
+    void getEmployee_getExistingEmployee_status200andEmployeeReturned() throws Exception {
         employee.setId(1);
 
         Mockito.doReturn(employee).when(employeeService).getEmployee(Mockito.anyInt());
@@ -95,7 +95,7 @@ class EmployeeRESTControllerTest {
     }
 
     @Test
-    void addNewEmployee() throws Exception {
+    void addNewEmployee_addEmployee_status201andEmployeeReturned() throws Exception {
         mockMvc.perform(
                 post("/api/employees")
                         .content(objectMapper.writeValueAsString(employee))
@@ -108,7 +108,7 @@ class EmployeeRESTControllerTest {
 
 
     @Test
-    void updateEmployee() throws Exception {
+    void updateEmployee_updateExistingEmployee_status200andUpdatedReturns() throws Exception {
         employee.setId(1);
 
         Mockito.doReturn(employee).when(employeeService).updateEmployee(Mockito.any(Employee.class), Mockito.anyInt());
@@ -138,7 +138,7 @@ class EmployeeRESTControllerTest {
     }
 
     @Test
-    void deleteEmployee() throws Exception {
+    void deleteEmployee_deleteExistingEmployee_status200andDeletedReturns() throws Exception {
         Mockito.doReturn(employee).when(employeeService).deleteEmployee(Mockito.anyInt());
 
         mockMvc.perform(
