@@ -78,6 +78,13 @@ class EmployeeDAOImplTest {
 
     @Test
     @Transactional
+    void getEmployee_getNotExistingEmployee_null() {
+        Employee emp = employeeDAO.getEmployee(99);
+        assertNull(emp);
+    }
+
+    @Test
+    @Transactional
     void deleteEmployee() {
         List<Employee> emps = employeeDAO.getAllEmployees();
         assertEquals(3, emps.size());

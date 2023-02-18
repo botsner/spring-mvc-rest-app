@@ -1,6 +1,8 @@
 package ru.botsner.spring.rest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.botsner.spring.rest.entity.Employee;
 import ru.botsner.spring.rest.exception_handling.EmployeeNotFoundException;
@@ -20,41 +22,44 @@ public class EmployeeRESTController {
     }
 
     @GetMapping
-    public List<Employee> listAllEmployees() {
-        return employeeService.getAllEmployees();
+    public ResponseEntity<List<Employee>> listAllEmployees() {
+        List<Employee> employees = employeeService.getAllEmployees();
+        return ResponseEntity.ok().body(employees);
     }
 
     @GetMapping("/{empId}")
-    public Employee getEmployee(@PathVariable int empId) {
+    public ResponseEntity<Employee> getEmployee(@PathVariable int empId) {
         Employee employee = employeeService.getEmployee(empId);
 
         if (employee == null) {
-            throw new EmployeeNotFoundException("There is no employee with ID = " + empId + " in Database");
+            throw new EmployeeNotFoundException(empId);
         }
-
-        return employee;
+        return ResponseEntity.ok().body(employee);
     }
 
     @PostMapping
-    public Employee addNewEmployee(@RequestBody Employee employee) {
+    public ResponseEntity<Employee> addNewEmployee(@RequestBody Employee employee) {
         employeeService.saveEmployee(employee);
-        return employee;
+        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
     }
 
     @PutMapping("/{empId}")
-    public Employee updateEmployee(@RequestBody Employee employee, @PathVariable int empId) {
-        employeeService.updateEmployee(employee, empId);
-        return employee;
+    public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee, @PathVariable int empId) {
+        Employee updatedEmployee = employeeService.updateEmployee(employee, empId);
+
+        if (updatedEmployee == null) {
+            throw new EmployeeNotFoundException(empId);
+        }
+        return ResponseEntity.ok().body(updatedEmployee);
     }
 
     @DeleteMapping("/{empId}")
-    public String deleteEmployee(@PathVariable int empId) {
-        Employee employee = employeeService.getEmployee(empId);
-        if (employee == null) {
-            throw new EmployeeNotFoundException("There is no employee with ID = " + empId + " in Database");
-        }
+    public ResponseEntity<Employee> deleteEmployee(@PathVariable int empId) {
+        Employee deletedEmp = employeeService.deleteEmployee(empId);
 
-        employeeService.deleteEmployee(empId);
-        return "Employee with ID = " + empId + " was deleted";
+        if (deletedEmp == null) {
+            throw new EmployeeNotFoundException(empId);
+        }
+        return ResponseEntity.ok().body(deletedEmp);
     }
 }

@@ -55,14 +55,46 @@ class EmployeeServiceImplTest {
 
     @Test
     void updateEmployee() {
-        service.updateEmployee(employee, 1);
+        Employee updatedEmp = new Employee("Merin", "Gek", "HR", 1200);
+        employee.setId(1);
+        Mockito.doReturn(employee).when(employeeDAO).getEmployee(1);
+
+        service.updateEmployee(updatedEmp, 1);
+
         assertEquals(1, employee.getId());
-        Mockito.verify(employeeDAO, Mockito.only()).saveEmployee(employee);
+        assertEquals("Merin", employee.getName());
+        assertEquals("HR", employee.getDepartment());
+        assertEquals(1200, employee.getSalary());
+
+        Mockito.verify(employeeDAO, Mockito.only()).getEmployee(1);
+    }
+
+    @Test
+    void updateEmployee_updatedEmployeeNotFoundInDB_null() {
+        Mockito.doReturn(null).when(employeeDAO).getEmployee(1);
+
+        assertNull(service.updateEmployee(employee, 1));
+
+        Mockito.verify(employeeDAO, Mockito.only()).getEmployee(1);
     }
 
     @Test
     void deleteEmployee() {
-        service.deleteEmployee(1);
-        Mockito.verify(employeeDAO, Mockito.only()).deleteEmployee(1);
+        employee.setId(1);
+        Mockito.doReturn(employee).when(employeeDAO).getEmployee(1);
+
+        assertSame(employee, service.deleteEmployee(1));
+
+        Mockito.verify(employeeDAO, Mockito.times(1)).getEmployee(1);
+        Mockito.verify(employeeDAO, Mockito.times(1)).deleteEmployee(1);
+    }
+
+    @Test
+    void deleteEmployee_deletedEmployeeNotFoundInDB_null() {
+        Mockito.doReturn(null).when(employeeDAO).getEmployee(1);
+
+        assertNull(service.deleteEmployee(1));
+
+        Mockito.verify(employeeDAO, Mockito.only()).getEmployee(1);
     }
 }

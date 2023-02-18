@@ -38,14 +38,24 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
-    public void updateEmployee(Employee employee, int id) {
-        employee.setId(id);
-        employeeDAO.saveEmployee(employee);
+    public Employee updateEmployee(Employee employee, int id) {
+        Employee updatedEmp = employeeDAO.getEmployee(id);
+        if (updatedEmp != null) {
+            updatedEmp.setName(employee.getName());
+            updatedEmp.setSurname(employee.getSurname());
+            updatedEmp.setDepartment(employee.getDepartment());
+            updatedEmp.setSalary(employee.getSalary());
+        }
+        return updatedEmp;
     }
 
     @Override
     @Transactional
-    public void deleteEmployee(int id) {
-        employeeDAO.deleteEmployee(id);
+    public Employee deleteEmployee(int id) {
+        Employee deletedEmp = employeeDAO.getEmployee(id);
+        if (deletedEmp != null) {
+            employeeDAO.deleteEmployee(id);
+        }
+        return deletedEmp;
     }
 }
